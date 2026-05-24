@@ -28,6 +28,10 @@ def _media_url(path: str) -> str:
     return f"{settings.PUBLIC_BASE_URL}/uploads/{path}"
 
 
+def _logo_url(business: Business) -> Optional[str]:
+    return _media_url(business.logo_path) if business.logo_path else None
+
+
 def _location_to_lat_lng(location) -> tuple[Optional[float], Optional[float]]:
     if location is None:
         return None, None
@@ -93,6 +97,7 @@ def _build_my_business_view(db: Session, business: Business) -> MyBusinessOut:
         is_active=business.is_active,
         category=CategoryOut.model_validate(business.category),
         cover_url=cover_url,
+        logo_url=_logo_url(business),
         media=media_out,
         lat=lat,
         lng=lng,
@@ -286,6 +291,7 @@ def get_public_business_detail(
         hours=business.hours,
         category=CategoryOut.model_validate(category),
         cover_url=cover_url,
+        logo_url=_logo_url(business),
         media=media_out,
         average_rating=avg_rating,
         review_count=review_count,
@@ -308,6 +314,7 @@ def _to_public_summary(db: Session, business: Business) -> PublicBusinessSummary
         address=business.address,
         category=CategoryOut.model_validate(category),
         cover_url=cover_url,
+        logo_url=_logo_url(business),
         average_rating=avg_rating,
         review_count=review_count,
         lat=lat,
@@ -414,6 +421,7 @@ def get_business_for_owner(db: Session, business_id: int) -> BusinessDetail:
         is_active=business.is_active,
         category=CategoryOut.model_validate(category),
         cover_url=cover_url,
+        logo_url=_logo_url(business),
         media=media_out,
         average_rating=round(float(avg_rating), 2),
         review_count=int(review_count),
