@@ -10,5 +10,5 @@ venv/
 .ruff_cache/
 *.db
 *.sqlite3
-uploads/
-!uploads/.gitkeep
+/uploads/
+!/uploads/.gitkeep
