@@ -1,7 +1,35 @@
 from datetime import datetime
 from typing import Optional
+from urllib.parse import urlparse
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+
+def _normalize_social_url(value: Optional[str], allowed_hosts: tuple[str, ...], label: str) -> Optional[str]:
+    if value is None:
+        return None
+    cleaned = value.strip()
+    if not cleaned:
+        return None
+    if not cleaned.startswith(("http://", "https://")):
+        cleaned = f"https://{cleaned}"
+
+    parsed = urlparse(cleaned)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        raise ValueError(f"URL de {label} inválida")
+
+    host = parsed.netloc.lower()
+    if host.startswith("www."):
+        host = host[4:]
+    if not any(host == h or host.endswith("." + h) for h in allowed_hosts):
+        raise ValueError(
+            f"La URL de {label} debe apuntar a {' o '.join(allowed_hosts)}"
+        )
+    return cleaned
+
+
+_INSTAGRAM_HOSTS = ("instagram.com", "instagr.am")
+_FACEBOOK_HOSTS = ("facebook.com", "fb.com", "fb.me", "m.facebook.com")
 
 
 class CategoryOut(BaseModel):
@@ -69,6 +97,8 @@ class BusinessDetail(BaseModel):
     category: CategoryOut
     cover_url: Optional[str] = None
     logo_url: Optional[str] = None
+    instagram_url: Optional[str] = None
+    facebook_url: Optional[str] = None
     media: list[MediaOut] = []
     average_rating: float = 0.0
     review_count: int = 0
@@ -96,6 +126,18 @@ class BusinessCreate(BaseModel):
     phone: Optional[str] = Field(default=None, max_length=40)
     email: Optional[str] = Field(default=None, max_length=160)
     hours: Optional[str] = Field(default=None, max_length=255)
+    instagram_url: Optional[str] = Field(default=None, max_length=255)
+    facebook_url: Optional[str] = Field(default=None, max_length=255)
+
+    @field_validator("instagram_url")
+    @classmethod
+    def _validate_instagram(cls, v: Optional[str]) -> Optional[str]:
+        return _normalize_social_url(v, _INSTAGRAM_HOSTS, "Instagram")
+
+    @field_validator("facebook_url")
+    @classmethod
+    def _validate_facebook(cls, v: Optional[str]) -> Optional[str]:
+        return _normalize_social_url(v, _FACEBOOK_HOSTS, "Facebook")
 
 
 class BusinessUpdate(BaseModel):
@@ -107,6 +149,18 @@ class BusinessUpdate(BaseModel):
     phone: Optional[str] = Field(default=None, max_length=40)
     email: Optional[str] = Field(default=None, max_length=160)
     hours: Optional[str] = Field(default=None, max_length=255)
+    instagram_url: Optional[str] = Field(default=None, max_length=255)
+    facebook_url: Optional[str] = Field(default=None, max_length=255)
+
+    @field_validator("instagram_url")
+    @classmethod
+    def _validate_instagram(cls, v: Optional[str]) -> Optional[str]:
+        return _normalize_social_url(v, _INSTAGRAM_HOSTS, "Instagram")
+
+    @field_validator("facebook_url")
+    @classmethod
+    def _validate_facebook(cls, v: Optional[str]) -> Optional[str]:
+        return _normalize_social_url(v, _FACEBOOK_HOSTS, "Facebook")
 
 
 class BusinessLocationUpdate(BaseModel):
@@ -149,6 +203,8 @@ class PublicBusinessDetail(BaseModel):
     category: CategoryOut
     cover_url: Optional[str] = None
     logo_url: Optional[str] = None
+    instagram_url: Optional[str] = None
+    facebook_url: Optional[str] = None
     media: list[MediaOut] = []
     average_rating: float = 0.0
     review_count: int = 0
@@ -172,6 +228,8 @@ class MyBusinessOut(BaseModel):
     category: CategoryOut
     cover_url: Optional[str] = None
     logo_url: Optional[str] = None
+    instagram_url: Optional[str] = None
+    facebook_url: Optional[str] = None
     media: list[MediaOut] = []
     lat: Optional[float] = None
     lng: Optional[float] = None
