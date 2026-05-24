@@ -38,6 +38,7 @@ class Business(Base):
         ForeignKey("media.id", ondelete="SET NULL", use_alter=True, name="fk_business_cover_media"),
         nullable=True,
     )
+    logo_path: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

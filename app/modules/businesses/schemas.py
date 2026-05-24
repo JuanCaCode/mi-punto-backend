@@ -33,6 +33,7 @@ class BusinessSummary(BaseModel):
     is_active: bool
     category: CategoryOut
     cover_url: Optional[str] = None
+    logo_url: Optional[str] = None
     average_rating: float = 0.0
     review_count: int = 0
     distance_km: Optional[float] = None
@@ -67,6 +68,7 @@ class BusinessDetail(BaseModel):
     is_active: bool
     category: CategoryOut
     cover_url: Optional[str] = None
+    logo_url: Optional[str] = None
     media: list[MediaOut] = []
     average_rating: float = 0.0
     review_count: int = 0
@@ -124,6 +126,7 @@ class PublicBusinessSummary(BaseModel):
     address: str
     category: CategoryOut
     cover_url: Optional[str] = None
+    logo_url: Optional[str] = None
     average_rating: float = 0.0
     review_count: int = 0
     lat: Optional[float] = None
@@ -145,6 +148,7 @@ class PublicBusinessDetail(BaseModel):
     hours: Optional[str] = None
     category: CategoryOut
     cover_url: Optional[str] = None
+    logo_url: Optional[str] = None
     media: list[MediaOut] = []
     average_rating: float = 0.0
     review_count: int = 0
@@ -167,6 +171,7 @@ class MyBusinessOut(BaseModel):
     is_active: bool
     category: CategoryOut
     cover_url: Optional[str] = None
+    logo_url: Optional[str] = None
     media: list[MediaOut] = []
     lat: Optional[float] = None
     lng: Optional[float] = None
