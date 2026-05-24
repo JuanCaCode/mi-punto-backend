@@ -24,6 +24,7 @@ class User(Base):
         Enum(UserRole, name="user_role"), nullable=False, default=UserRole.end_user
     )
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    avatar_path: Mapped[str | None] = mapped_column(String(512), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
