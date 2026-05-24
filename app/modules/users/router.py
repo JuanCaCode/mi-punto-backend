@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, File, UploadFile
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -7,6 +7,7 @@ from app.modules.auth.models import User
 from app.modules.auth.schemas import UserOut, UserUpdate
 from app.modules.reviews import service as reviews_service
 from app.modules.reviews.schemas import MyReviewOut
+from app.modules.users import service as users_service
 
 router = APIRouter()
 
@@ -22,6 +23,15 @@ def update_me(
     db.commit()
     db.refresh(current_user)
     return current_user
+
+
+@router.post("/me/avatar", response_model=UserOut)
+async def upload_my_avatar(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> User:
+    return await users_service.save_user_avatar(db, current_user, file)
 
 
 @router.get("/me/reviews", response_model=list[MyReviewOut])

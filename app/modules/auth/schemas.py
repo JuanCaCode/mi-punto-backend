@@ -1,9 +1,16 @@
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
-from app.modules.auth.models import UserRole
+from app.core.config import settings
+from app.modules.auth.models import User, UserRole
+
+
+def avatar_public_url(path: str | None) -> str | None:
+    if not path:
+        return None
+    return f"{settings.PUBLIC_BASE_URL}/uploads/{path}"
 
 RegisterRole = Literal["business_admin", "end_user"]
 
@@ -29,6 +36,22 @@ class UserOut(BaseModel):
     role: UserRole
     is_active: bool
     created_at: datetime
+    avatar_url: str | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def _with_avatar_url(cls, data: Any) -> Any:
+        if isinstance(data, User):
+            return {
+                "id": data.id,
+                "email": data.email,
+                "full_name": data.full_name,
+                "role": data.role,
+                "is_active": data.is_active,
+                "created_at": data.created_at,
+                "avatar_url": avatar_public_url(data.avatar_path),
+            }
+        return data
 
 
 class TokenOut(BaseModel):
