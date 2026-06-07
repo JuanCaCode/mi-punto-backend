@@ -25,6 +25,21 @@ class Settings(BaseSettings):
         return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
 
     @property
+    def sqlalchemy_database_url(self) -> str:
+        """URL normalizada para SQLAlchemy.
+
+        Proveedores como Render entregan la URL con el esquema
+        ``postgresql://`` (o ``postgres://``); aqui se fuerza el driver
+        ``psycopg`` (v3), que es el instalado en requirements.txt.
+        """
+        url = self.DATABASE_URL
+        if url.startswith("postgresql://"):
+            return url.replace("postgresql://", "postgresql+psycopg://", 1)
+        if url.startswith("postgres://"):
+            return url.replace("postgres://", "postgresql+psycopg://", 1)
+        return url
+
+    @property
     def upload_path(self) -> Path:
         return Path(self.UPLOAD_DIR).resolve()
 

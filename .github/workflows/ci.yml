@@ -1,0 +1,77 @@
+name: CI
+
+# Integracion continua del backend (FastAPI).
+# Se ejecuta en cada Pull Request hacia main y en cada push a main.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Cancela ejecuciones previas de la misma rama/PR si llega un nuevo commit.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependencias de desarrollo
+        run: pip install -r requirements-dev.txt
+
+      - name: Ejecutar ruff (lint)
+        run: ruff check .
+
+      - name: Verificar formato (ruff format)
+        run: ruff format --check . || echo "::warning::Hay archivos sin formatear (no bloqueante)."
+
+  test:
+    name: Pruebas (pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependencias de desarrollo
+        run: pip install -r requirements-dev.txt
+
+      - name: Ejecutar pruebas automatizadas
+        run: python -m pytest
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    # El build solo tiene sentido si lint y pruebas pasan.
+    needs: [lint, test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependencias de produccion
+        run: pip install -r requirements.txt
+
+      - name: Compilar codigo (build)
+        run: python -m compileall app
+
+      - name: Verificar que la aplicacion arranca (smoke import)
+        run: python -c "from app.main import app; print('App importada correctamente')"

@@ -10,7 +10,7 @@ class Base(DeclarativeBase):
     pass
 
 
-engine = create_engine(settings.DATABASE_URL, pool_pre_ping=True, future=True)
+engine = create_engine(settings.sqlalchemy_database_url, pool_pre_ping=True, future=True)
 
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False, future=True)
 

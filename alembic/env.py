@@ -12,7 +12,7 @@ from app.modules.businesses import models as _businesses_models  # noqa: F401
 from app.modules.reviews import models as _reviews_models  # noqa: F401
 
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+config.set_main_option("sqlalchemy.url", settings.sqlalchemy_database_url)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
