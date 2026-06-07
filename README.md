@@ -151,3 +151,8 @@ En desarrollo bajo metodología ágil (Scrum), organizado por sprints y gestiona
 * Se recomienda seguir la estructura definida para mantener consistencia en el desarrollo.
 
 ---
+
+## 📞 Contact o
+Para cualquier consulta o colaboración, no dudes en contactarnos a través de:
+* **Email:**
+    * Juan Camilo: Juanccampo95@gmail.com  
