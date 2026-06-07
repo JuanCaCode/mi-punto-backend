@@ -43,6 +43,7 @@ app.include_router(uploads_router, prefix="/uploads-api", tags=["uploads"])
 app.include_router(metrics_router, prefix="/metrics", tags=["metrics"])
 
 
+# se agrega comentario
 @app.get("/", tags=["health"])
 def root():
     return {"message": "Mi Punto API funcionando", "status": "ok"}
