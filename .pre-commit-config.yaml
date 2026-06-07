@@ -1,0 +1,23 @@
+# Hooks que se ejecutan automaticamente en cada `git commit`.
+# Instalacion (una sola vez):
+#   pip install -r requirements-dev.txt
+#   pre-commit install
+#
+# Corren rapido: lint + pruebas UNITARIAS (las de integracion, que requieren
+# base de datos, quedan para el pipeline de CI).
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-lint
+        name: ruff (lint)
+        entry: ruff check
+        language: system
+        types: [python]
+        pass_filenames: false
+
+      - id: pytest-unit
+        name: pytest (pruebas unitarias)
+        entry: pytest -m "not integration"
+        language: system
+        types: [python]
+        pass_filenames: false

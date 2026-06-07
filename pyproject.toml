@@ -8,6 +8,37 @@ extend-exclude = ["alembic", "venv", ".venv"]
 select = ["E", "F", "I", "W"]
 ignore = ["E501"]  # el largo de linea lo gestiona el formateador
 
+[tool.ruff.lint.per-file-ignores]
+# conftest fija DATABASE_URL antes de importar la app: imports tardios a proposito.
+"tests/conftest.py" = ["E402", "I001"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+markers = [
+    "integration: pruebas de integracion que requieren base de datos PostGIS",
+]
+
+[tool.coverage.run]
+# Coverage sobre la CAPA DE LOGICA (services, security, schemas, config).
+# Se excluyen routers, modelos, main, IO de archivos y arranque (UI/glue).
+source = ["app"]
+omit = [
+    "app/__init__.py",
+    "app/*/__init__.py",
+    "app/**/__init__.py",
+    "app/main.py",
+    "app/core/database.py",
+    "app/**/router.py",
+    "app/**/models.py",
+    "app/shared/cities_router.py",
+    "app/modules/categories/*",
+    "app/modules/users/service.py",
+    "app/modules/uploads/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+# Umbral exigido: 85% de la capa de logica.
+fail_under = 85
