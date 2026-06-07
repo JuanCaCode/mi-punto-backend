@@ -1,0 +1,48 @@
+# Blueprint de infraestructura para Render (https://render.com).
+# Crea el servicio web (FastAPI) y una base de datos PostgreSQL.
+# El despliegue se dispara desde GitHub Actions (deploy.yml) via Deploy Hook.
+
+services:
+  - type: web
+    name: mi-punto-backend
+    runtime: python
+    plan: free
+    region: oregon
+    branch: main
+    # Render NO auto-despliega: el pipeline (deploy.yml) lo dispara al hacer
+    # merge a main. Asi el control del despliegue queda en GitHub Actions.
+    autoDeploy: false
+    buildCommand: pip install -r requirements.txt
+    # Aplica migraciones y luego levanta uvicorn en el puerto que asigna Render.
+    startCommand: alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mi-punto-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "60"
+      - key: UPLOAD_DIR
+        value: ./uploads
+      - key: PUBLIC_BASE_URL
+        # Render expone la URL publica del propio servicio.
+        fromService:
+          type: web
+          name: mi-punto-backend
+          property: hostport
+      - key: CORS_ORIGINS
+        # Ajustar al dominio real del frontend en Vercel.
+        sync: false
+
+databases:
+  - name: mi-punto-db
+    plan: free
+    region: oregon
+    # PostGIS viene disponible; se habilita con la migracion de alembic
+    # (CREATE EXTENSION IF NOT EXISTS postgis;).
+    postgresMajorVersion: "16"

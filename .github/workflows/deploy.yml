@@ -1,0 +1,37 @@
+name: Deploy a produccion (Render)
+
+# Despliegue continuo: solo al hacer merge / push a main.
+on:
+  push:
+    branches: [main]
+
+# Evita despliegues simultaneos pisandose entre si.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy backend en Render
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Disparar despliegue en Render
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "::error::Falta el secret RENDER_DEPLOY_HOOK_URL."
+            exit 1
+          fi
+          echo "Disparando despliegue en Render..."
+          http_code=$(curl -s -o response.txt -w "%{http_code}" -X POST "$RENDER_DEPLOY_HOOK_URL")
+          echo "Respuesta de Render (HTTP $http_code):"
+          cat response.txt
+          if [ "$http_code" -ge 200 ] && [ "$http_code" -lt 300 ]; then
+            echo "Despliegue solicitado correctamente."
+          else
+            echo "::error::Render respondio con HTTP $http_code."
+            exit 1
+          fi
